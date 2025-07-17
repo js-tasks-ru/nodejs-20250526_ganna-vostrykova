@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { Task, TaskStatus } from "./task.model";
+import { Task, TaskStatus, DEFAULT_PAGE, DEFAULT_LIMIT } from "./task.model";
+import { SearchAndPaginationDTO } from './dto/search-and-pagination.dto'
 
 @Injectable()
 export class TasksService {
@@ -35,10 +36,14 @@ export class TasksService {
       status: TaskStatus.IN_PROGRESS,
     },
   ];
-
   getFilteredTasks(
-    status?: TaskStatus,
-    page?: number,
-    limit?: number,
-  ): Task[] {}
+      { status, page = DEFAULT_PAGE, limit = DEFAULT_LIMIT }: SearchAndPaginationDTO
+  ): Task[]|any {
+    const skip = limit * (page-1)
+    const filteredTasks =  status
+        ? this.tasks.filter((task: Task) => task.status === status)
+        : this.tasks
+
+    return filteredTasks.slice(skip, limit * page)
+  }
 }
